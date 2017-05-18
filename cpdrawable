@@ -1,0 +1,61 @@
+#!/bin/bash
+
+ressourceToAddPath=$1
+
+echo `pwd`
+pathToProjectRes="app/src/main/res"
+
+###check if the current path is in project root###
+if [ ! -d "./"$pathToProjectRes ]
+then
+		echo "error: can not find "$pathToProjectRes
+		exit 0
+fi
+
+echo "info: project path ok"
+
+###check first argument###
+#echo $1
+helpme=$0" <ImgsToAddPathFolder> --copy-all-format"
+if [ $1 ]
+then
+	if [ $1 = "-h" ]
+	then
+		echo help:
+		echo $helpme
+		exit 0		
+	elif [ ! -d $1 ]
+	then
+		echo "error: "$1" does not exist"
+		exit 0
+	fi
+fi
+
+echo "info: process start"
+###process###
+formats=("mdpi" "hdpi" "xhdpi" "xxhdpi" "xxxhdpi")
+draw="/drawable-"
+pngToCopy=()
+if [ $1 ];then
+	findPngCommand=`ls $1 | grep .png`
+	pngToCopy=( $findPngCommand )
+fi
+
+for format in ${formats[@]}
+do
+	path_dpi=$pathToProjectRes$draw$format
+	if [ ! -d $path_dpi ];then
+		echo "info: creating folder"$path_dpi
+		mkdir $path_dpi
+	fi
+	
+	for ((i=0; i<${#pngToCopy[@]};i++)); do
+		if [ ! -f $path_dpi"/"${pngToCopy[$i]} ]
+		then
+			echo "info: copying "${pngToCopy[$i]}" into "$path_dpi
+			cp $1${pngToCopy[$i]} $path_dpi
+		else
+			echo "error: "$path_dpi"/"${pngToCopy[$i]}" already exists"
+		fi
+	done
+done
